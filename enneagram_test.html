@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>에니어그램 성격유형 검사</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f14;
+  --surface: #1a1a24;
+  --surface2: #22222f;
+  --border: #2a2a3a;
+  --text: #e8e6f0;
+  --text-dim: #8a889a;
+  --accent: #7c6ff7;
+  --accent-glow: rgba(124, 111, 247, 0.3);
+  --positive: #4ecdc4;
+  --negative: #ff6b6b;
+  --gold: #ffd700;
+
+  --type2: #e74c7a;
+  --type3: #f39c12;
+  --type4: #9b59b6;
+  --type5: #3498db;
+  --type6: #2ecc71;
+  --type7: #e67e22;
+  --type8: #e74c3c;
+  --type9: #1abc9c;
+  --type1: #95a5a6;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans KR', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Background effect */
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(ellipse at 30% 20%, rgba(124,111,247,0.06) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 80%, rgba(78,205,196,0.04) 0%, transparent 50%);
+  z-index: -1;
+  animation: bgFloat 20s ease-in-out infinite alternate;
+}
+
+@keyframes bgFloat {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  100% { transform: translate(-3%, 3%) rotate(2deg); }
+}
+
+/* Header */
+.header {
+  text-align: center;
+  padding: 60px 20px 40px;
+  position: relative;
+}
+
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 120px; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+.header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.8rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--accent) 0%, #a78bfa 50%, var(--positive) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -1px;
+  margin-bottom: 8px;
+}
+
+.header .subtitle {
+  font-size: 1rem;
+  color: var(--text-dim);
+  font-weight: 300;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.header .scale-info {
+  margin-top: 20px;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  background: var(--surface);
+  display: inline-block;
+  padding: 8px 24px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+}
+
+/* Progress bar */
+.progress-container {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(15,15,20,0.9);
+  backdrop-filter: blur(20px);
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.progress-bar-wrap {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.progress-track {
+  width: 100%;
+  height: 4px;
+  background: var(--surface2);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--positive));
+  border-radius: 100px;
+  transition: width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  width: 0%;
+}
+
+/* Navigation */
+.type-nav {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 20px;
+  flex-wrap: wrap;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.type-nav-btn {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.type-nav-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  transform: translateY(-2px);
+}
+
+.type-nav-btn.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+.type-nav-btn.completed::after {
+  content: '✓';
+  position: absolute;
+  top: -6px; right: -6px;
+  width: 16px; height: 16px;
+  background: var(--positive);
+  border-radius: 50%;
+  font-size: 0.55rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+/* Type Section */
+.type-section {
+  max-width: 700px;
+  margin: 0 auto 40px;
+  padding: 0 20px;
+  display: none;
+}
+
+.type-section.active {
+  display: block;
+  animation: fadeSlideIn 0.4s ease;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.type-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.type-number {
+  width: 56px; height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #fff;
+}
+
+.type-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.type-desc {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* Question columns */
+.question-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 600px) {
+  .question-columns { grid-template-columns: 1fr; }
+  .header h1 { font-size: 2rem; }
+}
+
+.column-header {
+  text-align: center;
+  padding: 10px;
+  border-radius: 12px 12px 0 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+}
+
+.column-positive .column-header {
+  background: linear-gradient(135deg, rgba(78,205,196,0.15), rgba(78,205,196,0.05));
+  color: var(--positive);
+  border-bottom: 2px solid rgba(78,205,196,0.3);
+}
+
+.column-negative .column-header {
+  background: linear-gradient(135deg, rgba(255,107,107,0.15), rgba(255,107,107,0.05));
+  color: var(--negative);
+  border-bottom: 2px solid rgba(255,107,107,0.3);
+}
+
+.question-list {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+}
+
+.question-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(42,42,58,0.5);
+  transition: background 0.2s;
+}
+
+.question-item:last-child { border-bottom: none; }
+
+.question-item:hover {
+  background: var(--surface2);
+}
+
+.question-text {
+  font-size: 0.9rem;
+  flex: 1;
+  margin-right: 12px;
+}
+
+.score-btns {
+  display: flex;
+  gap: 4px;
+}
+
+.score-btn {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.score-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  background: rgba(124,111,247,0.1);
+}
+
+.score-btn.selected {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 8px var(--accent-glow);
+}
+
+/* Subtotals */
+.subtotals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.subtotal-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.85rem;
+}
+
+.subtotal-label {
+  color: var(--text-dim);
+}
+
+.subtotal-value {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.total-box {
+  text-align: center;
+  padding: 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  margin-bottom: 24px;
+}
+
+.total-value {
+  font-weight: 900;
+  font-size: 1.4rem;
+  color: var(--accent);
+  margin-left: 8px;
+}
+
+/* Navigation buttons */
+.nav-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.nav-btn {
+  padding: 12px 32px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+.nav-btn:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.nav-btn.primary {
+  background: linear-gradient(135deg, var(--accent), #6c5ce7);
+  border-color: transparent;
+  color: #fff;
+}
+
+.nav-btn.primary:hover {
+  box-shadow: 0 4px 20px var(--accent-glow);
+}
+
+/* Results */
+.results-section {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+  display: none;
+}
+
+.results-section.active { display: block; }
+
+.results-title {
+  text-align: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 900;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--gold), #ffaa00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.results-subtitle {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  margin-bottom: 40px;
+}
+
+/* Radar chart */
+.chart-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+/* Bar chart */
+.bar-chart {
+  margin-bottom: 40px;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.bar-label {
+  width: 80px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.bar-track {
+  flex: 1;
+  height: 32px;
+  background: var(--surface);
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid var(--border);
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 8px;
+  transition: width 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+  min-width: 40px;
+}
+
+.top-type-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  text-align: center;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.top-type-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--positive), var(--gold));
+}
+
+.top-type-rank {
+  font-size: 0.75rem;
+  color: var(--gold);
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.top-type-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem;
+  font-weight: 900;
+  color: var(--accent);
+}
+
+.top-type-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.top-type-score {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+@media (max-width: 600px) {
+  .detail-grid { grid-template-columns: 1fr; }
+}
+
+.detail-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.detail-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.detail-type-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.detail-score {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.detail-bar {
+  height: 6px;
+  background: var(--surface2);
+  border-radius: 100px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.detail-bar-fill {
+  height: 100%;
+  border-radius: 100px;
+  transition: width 1s ease;
+}
+
+.detail-breakdown {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+/* Reset button */
+.reset-btn {
+  display: block;
+  margin: 30px auto;
+  padding: 14px 40px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+.reset-btn:hover {
+  border-color: var(--negative);
+  color: var(--negative);
+}
+
+/* Scroll to top */
+.scroll-top {
+  position: fixed;
+  bottom: 24px; right: 24px;
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s;
+  z-index: 99;
+  box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+.scroll-top.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Enneagram</h1>
+  <div class="subtitle">에니어그램 성격유형 검사</div>
+  <div class="scale-info">3점 척도 : 그렇지 않다(1점) · 보통이다(2점) · 그렇다(3점)</div>
+</div>
+
+<div class="progress-container">
+  <div class="progress-bar-wrap">
+    <div class="progress-info">
+      <span id="progressLabel">0 / 162 문항 완료</span>
+      <span id="progressPercent">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+</div>
+
+<div class="type-nav" id="typeNav"></div>
+
+<div id="sectionsContainer"></div>
+
+<div class="results-section" id="resultsSection">
+  <div class="results-title">검사 결과</div>
+  <div class="results-subtitle">당신의 에니어그램 성격유형 프로필</div>
+  <div id="topTypeCard"></div>
+  <div class="bar-chart" id="barChart"></div>
+  <div class="detail-grid" id="detailGrid"></div>
+  <button class="reset-btn" onclick="resetAll()">다시 검사하기</button>
+</div>
+
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+const typeData = [
+  {
+    num: 2, name: '조력가', color: '#e74c7a',
+    positive: ['다정다감하다','사람을 잘 보살핀다','적응을 잘 한다','사람에게 먼저 다가간다','감정을 잘 알아차린다','친절하다','사랑스럽다','따뜻하다','공감을 잘 한다'],
+    negative: ['소유욕이 강하다','감정을 과하게 표현한다','에둘러 말한다','조정하려한다','의존적이다','거절을 못한다','관계 지향적이다','자신의 욕구를 억압한다','자기희생적이다']
+  },
+  {
+    num: 3, name: '성취자', color: '#f39c12',
+    positive: ['자신감이 있다','목표지향적이다','효율적이다','자주적이다','실용적이다','유능하다','매력적이다','동기부여자이다','진취적이다'],
+    negative: ['경쟁적이다','자기 자랑이 심하다','가식적이다','기만적이다','계산적이다','이용 한다','허영심이 있다','카멜레온 같다','실패를 피한다']
+  },
+  {
+    num: 4, name: '예술가', color: '#9b59b6',
+    positive: ['영감이 있다','자신에게 진실하다','감수성이 예민하다','예술적이다','표현력이 있다','창의적이다','품위가 있다','자기 성찰적이다','아름다움을 창출한다'],
+    negative: ['우울하다','자의식이 강하다','위축된다','감정기복이 심하다','자신에게만 몰두한다','히스테리적 태도가 있다','시기심이 있다','까다롭다','감정적으로 민감하다']
+  },
+  {
+    num: 5, name: '관찰자', color: '#3498db',
+    positive: ['분석적이다','끈기가 있다','현명하다','객관적이다','통찰력이 있다','자립적이다','정보를 수집한다','지각이 있다','독창적이다'],
+    negative: ['지적인 교만이 있다','인색하다','비판적이다','거리를 둔다','고집이 세다','정보 교류를 하지 않는다','인간관계를 소홀히 한다','비밀스럽다','감정표현이 부족하다']
+  },
+  {
+    num: 6, name: '충성가', color: '#2ecc71',
+    positive: ['충실하다','책임감이 있다','문제를 예견한다','신용과 협동심이 있다','끈기를 갖고 노력한다','헌신적이다','신중하다','철저히 준비한다','꼼꼼하다'],
+    negative: ['방어적이다','융통성이 없다','의심이 많다','걱정과 불안이 있다','우유부단하다','과도하게 분석한다','공격적이다','순종적이다','경계심이 있다']
+  },
+  {
+    num: 7, name: '낙천가', color: '#e67e22',
+    positive: ['재미를 추구한다','상상력이 풍부하다','열정적이다','신속하다','호기심이 많다','자발적이다','사교적이다','매력적이다','자신감이 있다'],
+    negative: ['자기도취에 빠진다','산만하다','제멋대로이다','자기애가 강하다','충동적이다','반항적이다','방어적이다','지나치게 들떠있다','고통스런 상황을 피한다']
+  },
+  {
+    num: 8, name: '지도자', color: '#e74c3c',
+    positive: ['솔직하다','권위가 있다','사람들을 보호해 준다','추진력이 있다','독립적이다','지도력이 있다','힘이 있다','자신감이 넘친다','정의롭다'],
+    negative: ['공격적이다','반항적이다','약자를 무시한다','타협하는 것이 어렵다','약함을 드러내지 않는다','통제하려 든다','약함을 경멸한다','타인의 말을 듣지 않는다','자기 과시적이다']
+  },
+  {
+    num: 9, name: '중재자', color: '#1abc9c',
+    positive: ['느긋하다','인내심이 강하다','긍정적이다','원만하다','겸손하다','안정적이다','수용적이다','조화롭다','편안하다'],
+    negative: ['고집스럽다','우선순위가 어렵다','자신을 과소평가한다','게으르고 나태하다','자기를 비하한다','멍 하다','자신을 잊어버린다','우유부단하다','갈등을 회피한다']
+  },
+  {
+    num: 1, name: '개혁가', color: '#95a5a6',
+    positive: ['공정하다','정직하다','윤리적이다','원리원칙을 지킨다','정리정돈을 잘 한다','질서를 지킨다','성실하다','근면하다','예의를 잘 지킨다'],
+    negative: ['판단하려한다','융통성이 없다','비판적이다','심각하다','긴장을 많이 한다','분개한다','이중성이 있다','자기 고집이 세다','참을성이 없다']
+  }
+];
+
+const typeOrder = [2,3,4,5,6,7,8,9,1];
+const scores = {};
+const totalQuestions = 162; // 9 types × 18 questions
+
+// Initialize scores
+typeData.forEach(t => {
+  scores[t.num] = {};
+  t.positive.forEach((_, i) => scores[t.num][`p${i}`] = 0);
+  t.negative.forEach((_, i) => scores[t.num][`n${i}`] = 0);
+});
+
+// Build navigation
+const nav = document.getElementById('typeNav');
+typeOrder.forEach((num, idx) => {
+  const btn = document.createElement('button');
+  btn.className = 'type-nav-btn' + (idx === 0 ? ' active' : '');
+  btn.textContent = num;
+  btn.dataset.type = num;
+  btn.onclick = () => showType(num);
+  nav.appendChild(btn);
+});
+
+// Build sections
+const container = document.getElementById('sectionsContainer');
+typeData.forEach((type, idx) => {
+  const section = document.createElement('div');
+  section.className = 'type-section' + (idx === 0 ? ' active' : '');
+  section.id = `type-${type.num}`;
+  section.innerHTML = `
+    <div class="type-header">
+      <div class="type-number" style="background:${type.color}">${type.num}</div>
+      <div>
+        <div class="type-title">${type.num}유형</div>
+        <div class="type-desc">아래 문항을 읽고 자신에게 해당하는 점수를 선택하세요</div>
+      </div>
+    </div>
+    <div class="question-columns">
+      <div class="column-positive">
+        <div class="column-header">긍정적 모습</div>
+        <div class="question-list">
+          ${type.positive.map((q, i) => `
+            <div class="question-item">
+              <div class="question-text">${q}</div>
+              <div class="score-btns">
+                ${[1,2,3].map(s => `<button class="score-btn" data-type="${type.num}" data-key="p${i}" data-score="${s}" onclick="setScore(this)">${s}</button>`).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="column-negative">
+        <div class="column-header">개선할 모습</div>
+        <div class="question-list">
+          ${type.negative.map((q, i) => `
+            <div class="question-item">
+              <div class="question-text">${q}</div>
+              <div class="score-btns">
+                ${[1,2,3].map(s => `<button class="score-btn" data-type="${type.num}" data-key="n${i}" data-score="${s}" onclick="setScore(this)">${s}</button>`).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="subtotals">
+      <div class="subtotal-box">
+        <span class="subtotal-label">긍정 소계</span>
+        <span class="subtotal-value" id="pos-${type.num}" style="color:${type.color}">0</span>
+      </div>
+      <div class="subtotal-box">
+        <span class="subtotal-label">개선 소계</span>
+        <span class="subtotal-value" id="neg-${type.num}" style="color:${type.color}">0</span>
+      </div>
+    </div>
+    <div class="total-box">
+      합계 <span class="total-value" id="total-${type.num}">0</span>
+    </div>
+    <div class="nav-buttons">
+      ${idx > 0 ? `<button class="nav-btn" onclick="showType(${typeOrder[idx-1]})">← 이전</button>` : ''}
+      ${idx < typeOrder.length - 1 ? `<button class="nav-btn primary" onclick="showType(${typeOrder[idx+1]})">다음 →</button>` : `<button class="nav-btn primary" onclick="showResults()">결과 보기 →</button>`}
+    </div>
+  `;
+  container.appendChild(section);
+});
+
+function setScore(btn) {
+  const type = parseInt(btn.dataset.type);
+  const key = btn.dataset.key;
+  const score = parseInt(btn.dataset.score);
+
+  scores[type][key] = score;
+
+  // Update button states
+  const siblings = btn.parentElement.querySelectorAll('.score-btn');
+  siblings.forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+
+  updateTotals(type);
+  updateProgress();
+}
+
+function updateTotals(type) {
+  const typeScores = scores[type];
+  let posSum = 0, negSum = 0;
+  Object.keys(typeScores).forEach(k => {
+    if (k.startsWith('p')) posSum += typeScores[k];
+    else negSum += typeScores[k];
+  });
+
+  document.getElementById(`pos-${type}`).textContent = posSum;
+  document.getElementById(`neg-${type}`).textContent = negSum;
+  document.getElementById(`total-${type}`).textContent = posSum + negSum;
+}
+
+function updateProgress() {
+  let answered = 0;
+  Object.keys(scores).forEach(type => {
+    Object.values(scores[type]).forEach(v => { if (v > 0) answered++; });
+  });
+
+  const pct = Math.round((answered / totalQuestions) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${answered} / ${totalQuestions} 문항 완료`;
+  document.getElementById('progressPercent').textContent = pct + '%';
+
+  // Check completed types
+  typeData.forEach(t => {
+    const allDone = Object.values(scores[t.num]).every(v => v > 0);
+    const btn = document.querySelector(`.type-nav-btn[data-type="${t.num}"]`);
+    if (allDone) btn.classList.add('completed');
+    else btn.classList.remove('completed');
+  });
+}
+
+function showType(num) {
+  document.querySelectorAll('.type-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.type-nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`type-${num}`).classList.add('active');
+  document.querySelector(`.type-nav-btn[data-type="${num}"]`).classList.add('active');
+  document.getElementById('resultsSection').classList.remove('active');
+  window.scrollTo({ top: 200, behavior: 'smooth' });
+}
+
+function showResults() {
+  document.querySelectorAll('.type-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.type-nav-btn').forEach(b => b.classList.remove('active'));
+
+  const results = typeData.map(t => {
+    let posSum = 0, negSum = 0;
+    Object.keys(scores[t.num]).forEach(k => {
+      if (k.startsWith('p')) posSum += scores[t.num][k];
+      else negSum += scores[t.num][k];
+    });
+    return { num: t.num, name: t.name, color: t.color, pos: posSum, neg: negSum, total: posSum + negSum };
+  });
+
+  results.sort((a, b) => b.total - a.total);
+  const maxScore = 54; // 18 questions × 3 max
+
+  // Top type card
+  const top = results[0];
+  document.getElementById('topTypeCard').innerHTML = `
+    <div class="top-type-card">
+      <div class="top-type-rank">★ 최고 점수 유형 ★</div>
+      <div class="top-type-num">${top.num}</div>
+      <div class="top-type-name">${top.num}유형 — ${top.name}</div>
+      <div class="top-type-score">총점 ${top.total}점 (긍정 ${top.pos} + 개선 ${top.neg})</div>
+    </div>
+  `;
+
+  // Bar chart
+  document.getElementById('barChart').innerHTML = results.map(r => `
+    <div class="bar-row">
+      <div class="bar-label" style="color:${r.color}">${r.num}유형<br><small>${r.name}</small></div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${(r.total / maxScore * 100).toFixed(1)}%;background:${r.color}">${r.total}</div>
+      </div>
+    </div>
+  `).join('');
+
+  // Detail grid
+  document.getElementById('detailGrid').innerHTML = results.map(r => `
+    <div class="detail-card">
+      <div class="detail-card-header">
+        <span class="detail-type-label" style="color:${r.color}">${r.num}유형 ${r.name}</span>
+        <span class="detail-score">${r.total}점</span>
+      </div>
+      <div class="detail-bar">
+        <div class="detail-bar-fill" style="width:${(r.total / maxScore * 100).toFixed(1)}%;background:${r.color}"></div>
+      </div>
+      <div class="detail-breakdown">
+        <span>긍정 ${r.pos}점</span>
+        <span>개선 ${r.neg}점</span>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('resultsSection').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Animate bars
+  setTimeout(() => {
+    document.querySelectorAll('.bar-fill, .detail-bar-fill').forEach(el => {
+      el.style.width = el.style.width;
+    });
+  }, 100);
+}
+
+function resetAll() {
+  if (!confirm('모든 응답을 초기화하시겠습니까?')) return;
+
+  typeData.forEach(t => {
+    Object.keys(scores[t.num]).forEach(k => scores[t.num][k] = 0);
+    updateTotals(t.num);
+  });
+
+  document.querySelectorAll('.score-btn').forEach(b => b.classList.remove('selected'));
+  updateProgress();
+  document.getElementById('resultsSection').classList.remove('active');
+  showType(2);
+}
+
+// Scroll to top button
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('scrollTop');
+  btn.classList.toggle('visible', window.scrollY > 400);
+});
+</script>
+</body>
+</html>
